@@ -1,0 +1,11 @@
+baseURL = 'https://marsup.games/'
+languageCode = 'fr-fr'
+title = 'Marolles Sur Un Plateau'
+description = "Site de l'association Marolles Sur Un Plateau!"
+theme = 'marsup_theme'
+googleAnalytics = ""
+enableRobotsTXT = true
+enableGitInfo = true
+enableEmoji = true
+# [params]
+#   favicon = "images/favicon.ico"

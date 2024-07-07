@@ -29,7 +29,8 @@
 				"GitHub.copilot-chat",
 				"equinusocio.vsc-material-theme-icons",
 				"Equinusocio.vsc-material-theme",
-				"benjaminadk.emojis4git"
+				"benjaminadk.emojis4git",
+				"seatonjiang.gitmoji-vscode"
 			]
 		}
 	},
