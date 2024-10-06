@@ -1,0 +1,65 @@
+name: Deploy Hugo site
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    env:
+      HUGO_VERSION: 0.130.0
+      GO_VERSION: 1.23.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt install wget git lftp -y
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Get architecture
+        id: arch
+        run: echo "arch=$(uname -m)" >> $GITHUB_ENV
+      - name: Install Hugo CLI
+        run: |
+          if [ "${{ env.arch }}" = "x86_64" ]; then
+            wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb
+          elif [ "${{ env.arch }}" = "arm64" ] || [ "${{ env.arch }}" = "aarch64" ]; then
+            wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-arm64.deb
+          else
+            echo "Unsupported architecture: ${{ env.arch }}"
+            exit 1
+          fi
+          sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Setup site
+        run: |
+          npm run project-setup
+      - name: Install dependencies
+        run: |
+          npm install          
+      - name: Build
+        run: hugo
+      - name: Deploy to sftp
+        run: |
+          echo "Retreive hostkey"
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SFTP_SERVER }} >> ~/.ssh/known_hosts
+          echo "Cleaning up previous build"
+          lftp -u "${{ secrets.SFTP_USERNAME }},${{ secrets.SFTP_PASSWORD }}" sftp://${{ secrets.SFTP_SERVER }} -e "rm -r www/; exit"
+          echo "Creating new build"
+          echo "Deploying to SFTP"
+          lftp -u "${{ secrets.SFTP_USERNAME }},${{ secrets.SFTP_PASSWORD }}" sftp://${{ secrets.SFTP_SERVER }} -e "mirror -R public/ www/; exit"
+          echo "Setting permissions"
+          lftp -u "${{ secrets.SFTP_USERNAME }},${{ secrets.SFTP_PASSWORD }}" sftp://${{ secrets.SFTP_SERVER }} -e "chmod 0755 www/; exit"
+          echo "Deployed to SFTP"

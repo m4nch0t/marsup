@@ -1,0 +1,40 @@
+{
+  "name": "Hugo",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/hugo:1": {
+      "version": " 0.130.0",
+      "extended": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "html.format.templating": true
+      },
+      "extensions": [
+        "davidanson.vscode-markdownlint",
+        "ms-azuretools.vscode-docker",
+        "golang.go",
+        "budparr.language-hugo-vscode",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "equinusocio.vsc-material-theme-icons",
+        "Equinusocio.vsc-material-theme",
+        "benjaminadk.emojis4git",
+        "seatonjiang.gitmoji-vscode",
+        "tamasfe.even-better-toml",
+        "ms-python.python",
+        "ms-vscode.makefile-tools"
+      ]
+    }
+  },
+  "forwardPorts": [
+    1313
+  ],
+  "postCreateCommand": "sudo .devcontainer/setup.sh",
+  "remoteUser": "vscode"
+}
